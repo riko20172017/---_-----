@@ -1,20 +1,31 @@
-import { readFile } from 'fs/promises';
+import { readFile, writeFile } from 'fs/promises';
 const json = JSON.parse(
   await readFile(
     new URL('./respons.json', import.meta.url)
   )
 );
 
-let groups = [];
+let students = [];
 
-json.map((i) =>
-  i.data.map((j) =>
-    groups.push({
-      nameFamily: j.principal.nameFamily,
-      nameGiven: j.principal.nameGiven,
-      nameMiddle: j.principal.nameMiddle,
+json.map((i, y) => {
+  i.data.map((j, x) => {
+    j.pupilProfile.pupilRoles.map((p) => {
+      students.push({
+        "id": j.id,
+        "фамилия": j.principal.nameFamily,
+        "имя": j.principal.nameGiven,
+        "отчество": j.principal.nameMiddle,
+        "группа": p.hasOwnProperty("eduGroup") ? p.eduGroup.name : "no-group",
+        "status": p.status,
+        "isDeleted": p.isDeleted,
+      })
     })
+  }
   )
-)
+})
 
-console.log(groups);
+try {
+  await writeFile('result.txt', JSON.stringify(students));
+} catch (err) {
+  console.log(err);
+}
